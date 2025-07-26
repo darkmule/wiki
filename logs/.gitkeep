@@ -1,2 +1,2 @@
-# This file preserves the logs directory structure
+# This file preserves the logs directory structure, which is required by the start-server.sh script
 # Server logs will be created here but excluded from git tracking
