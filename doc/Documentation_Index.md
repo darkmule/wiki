@@ -46,7 +46,7 @@ This research project has produced comprehensive documentation for upgrading the
 
 ## Supporting Documents
 
-### 5. 📖 **README.md**
+### 5. 📖 **../README.md**
 **Audience:** All users  
 **Purpose:** Project overview and current features  
 **Contains:** Current project documentation and user guide  
