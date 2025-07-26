@@ -200,6 +200,115 @@
             }
         }
         
+        /* Interactive Elements Styles */
+        .click-sparkle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 0 8px rgba(255,255,255,0.9);
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999;
+            transition: opacity 0.3s ease;
+        }
+        
+        .floating-emoji {
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+        
+        .floating-emoji:hover {
+            transform: scale(1.3) rotate(15deg);
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.6)) brightness(1.2);
+        }
+        
+        .hello-world {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .hello-world:hover {
+            transform: scale(1.05);
+        }
+        
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1001;
+        }
+        
+        .control-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.6);
+            transform: scale(1.05);
+        }
+        
+        .emoji-explosion {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 1000;
+            animation: emoji-burst 1s ease-out forwards;
+        }
+        
+        @keyframes emoji-burst {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.5) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5) rotate(360deg) translateY(-50px);
+            }
+        }
+        
+        @keyframes click-explosion {
+            0% {
+                opacity: 1;
+                transform: scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(2);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(4);
+            }
+        }
+
         @media (max-width: 768px) {
             .hello-world {
                 font-size: 2.5rem;
@@ -207,14 +316,29 @@
             .subtitle {
                 font-size: 1.2rem;
             }
+            .controls {
+                top: 10px;
+                right: 10px;
+            }
+            .control-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="floating-emoji">🌈</div>
-    <div class="floating-emoji">✨</div>
-    <div class="floating-emoji">🎉</div>
-    <div class="floating-emoji">🚀</div>
+    <div class="floating-emoji" data-emoji="🌈">🌈</div>
+    <div class="floating-emoji" data-emoji="✨">✨</div>
+    <div class="floating-emoji" data-emoji="🎉">🎉</div>
+    <div class="floating-emoji" data-emoji="🚀">🚀</div>
+    
+    <div class="controls">
+        <button class="control-btn" id="theme-btn">🎨 Themes</button>
+        <button class="control-btn" id="speed-btn">⚡ Speed</button>
+        <button class="control-btn" id="sound-btn">🔊 Sound</button>
+        <button class="control-btn" id="edit-btn">✏️ Edit Text</button>
+    </div>
     
     <div class="container">
         <div class="sparkle"></div>
@@ -224,8 +348,351 @@
         <div class="sparkle"></div>
         <div class="sparkle"></div>
         
-        <h1 class="hello-world">Hello World!</h1>
+        <h1 class="hello-world" id="main-text" contenteditable="false">Hello World!</h1>
         <p class="subtitle">Welcome to the funkiest corner of the web! 🎨</p>
     </div>
+
+    <script>
+        // Interactive Funky Page Enhancement
+        // Author: AI Assistant
+        
+        class FunkyInteractions {
+            constructor() {
+                this.isEditMode = false;
+                this.currentTheme = 0;
+                this.animationSpeed = 1;
+                this.soundEnabled = false;
+                this.cursorTrail = [];
+                this.maxTrailLength = 20;
+                
+                this.themes = [
+                    {
+                        name: 'Original',
+                        gradient: 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #dda0dd)',
+                        emoji: '🎨'
+                    },
+                    {
+                        name: 'Neon',
+                        gradient: 'linear-gradient(45deg, #ff0080, #00ff80, #8000ff, #ff8000, #0080ff, #ff4000)',
+                        emoji: '⚡'
+                    },
+                    {
+                        name: 'Sunset',
+                        gradient: 'linear-gradient(45deg, #ff6b35, #f7931e, #ffd23f, #ff6b6b, #c44569, #f8b500)',
+                        emoji: '🌅'
+                    },
+                    {
+                        name: 'Ocean',
+                        gradient: 'linear-gradient(45deg, #00c9ff, #92fe9d, #74b9ff, #0984e3, #6c5ce7, #a29bfe)',
+                        emoji: '🌊'
+                    },
+                    {
+                        name: 'Galaxy',
+                        gradient: 'linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe)',
+                        emoji: '🌌'
+                    }
+                ];
+                
+                this.init();
+            }
+            
+            init() {
+                this.loadPreferences();
+                this.bindEvents();
+                this.startCursorTrail();
+                this.updateThemeButton();
+                this.updateSpeedButton();
+                this.updateSoundButton();
+            }
+            
+            bindEvents() {
+                // Click explosion effect
+                document.addEventListener('click', (e) => this.createClickExplosion(e));
+                
+                // Emoji interactions
+                document.querySelectorAll('.floating-emoji').forEach(emoji => {
+                    emoji.addEventListener('click', (e) => this.handleEmojiClick(e));
+                });
+                
+                // Control buttons
+                document.getElementById('theme-btn').addEventListener('click', () => this.cycleTheme());
+                document.getElementById('speed-btn').addEventListener('click', () => this.cycleSpeed());
+                document.getElementById('sound-btn').addEventListener('click', () => this.toggleSound());
+                document.getElementById('edit-btn').addEventListener('click', () => this.toggleEditMode());
+                
+                // Mouse movement for cursor trail
+                document.addEventListener('mousemove', (e) => this.updateCursorTrail(e));
+                
+                // Text editing
+                document.getElementById('main-text').addEventListener('blur', () => this.saveText());
+                document.getElementById('main-text').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.target.blur();
+                    }
+                });
+            }
+            
+            createClickExplosion(e) {
+                const numSparks = 8;
+                const colors = ['#fff', '#ff6b6b', '#4ecdc4', '#45b7d1', '#ffeaa7', '#dda0dd'];
+                
+                for (let i = 0; i < numSparks; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'click-sparkle';
+                    spark.style.left = e.clientX + 'px';
+                    spark.style.top = e.clientY + 'px';
+                    spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    const angle = (360 / numSparks) * i;
+                    const distance = 50 + Math.random() * 50;
+                    const duration = 0.8 + Math.random() * 0.4;
+                    
+                    spark.style.animation = `click-explosion ${duration}s ease-out forwards`;
+                    
+                    // Random movement
+                    setTimeout(() => {
+                        const radians = (angle * Math.PI) / 180;
+                        const x = Math.cos(radians) * distance;
+                        const y = Math.sin(radians) * distance;
+                        spark.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+                    }, 10);
+                    
+                    document.body.appendChild(spark);
+                    
+                    setTimeout(() => spark.remove(), duration * 1000);
+                }
+                
+                this.playSound('click');
+            }
+            
+            handleEmojiClick(e) {
+                e.stopPropagation();
+                const emoji = e.target;
+                const emojiChar = emoji.dataset.emoji;
+                
+                // Create emoji explosion
+                for (let i = 0; i < 5; i++) {
+                    const explosion = document.createElement('div');
+                    explosion.className = 'emoji-explosion';
+                    explosion.textContent = emojiChar;
+                    explosion.style.left = e.clientX + (Math.random() - 0.5) * 100 + 'px';
+                    explosion.style.top = e.clientY + (Math.random() - 0.5) * 100 + 'px';
+                    
+                    document.body.appendChild(explosion);
+                    setTimeout(() => explosion.remove(), 1000);
+                }
+                
+                // Emoji reaction animation
+                emoji.style.animation = 'none';
+                emoji.offsetHeight; // Trigger reflow
+                emoji.style.animation = 'enhanced-float 0.5s ease-in-out';
+                
+                this.playSound('emoji');
+            }
+            
+            updateCursorTrail(e) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.left = e.clientX + 'px';
+                trail.style.top = e.clientY + 'px';
+                
+                document.body.appendChild(trail);
+                this.cursorTrail.push(trail);
+                
+                if (this.cursorTrail.length > this.maxTrailLength) {
+                    const oldTrail = this.cursorTrail.shift();
+                    oldTrail.remove();
+                }
+                
+                // Fade out trail
+                setTimeout(() => {
+                    trail.style.opacity = '0';
+                    setTimeout(() => {
+                        if (trail.parentNode) trail.remove();
+                    }, 300);
+                }, 100);
+            }
+            
+            cycleTheme() {
+                this.currentTheme = (this.currentTheme + 1) % this.themes.length;
+                const theme = this.themes[this.currentTheme];
+                
+                document.body.style.background = theme.gradient;
+                document.body.style.backgroundSize = '400% 400%';
+                
+                this.updateThemeButton();
+                this.savePreferences();
+                this.playSound('theme');
+            }
+            
+            cycleSpeed() {
+                const speeds = [0.5, 1, 1.5, 2];
+                const currentIndex = speeds.indexOf(this.animationSpeed);
+                this.animationSpeed = speeds[(currentIndex + 1) % speeds.length];
+                
+                document.documentElement.style.setProperty('--animation-speed', this.animationSpeed);
+                
+                // Update animation durations
+                const style = document.createElement('style');
+                style.textContent = `
+                    body { animation-duration: ${8 / this.animationSpeed}s; }
+                    .hello-world { animation-duration: ${2.5 / this.animationSpeed}s, ${3.5 / this.animationSpeed}s, ${4 / this.animationSpeed}s; }
+                    .floating-emoji { animation-duration: ${5 / this.animationSpeed}s; }
+                    .sparkle { animation-duration: ${1.5 / this.animationSpeed}s; }
+                `;
+                
+                // Remove old speed style if exists
+                const oldStyle = document.getElementById('speed-style');
+                if (oldStyle) oldStyle.remove();
+                
+                style.id = 'speed-style';
+                document.head.appendChild(style);
+                
+                this.updateSpeedButton();
+                this.savePreferences();
+                this.playSound('speed');
+            }
+            
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                this.updateSoundButton();
+                this.savePreferences();
+                
+                if (this.soundEnabled) {
+                    this.playSound('sound_on');
+                }
+            }
+            
+            toggleEditMode() {
+                this.isEditMode = !this.isEditMode;
+                const textElement = document.getElementById('main-text');
+                
+                if (this.isEditMode) {
+                    textElement.contentEditable = 'true';
+                    textElement.focus();
+                    textElement.style.outline = '2px dashed rgba(255,255,255,0.5)';
+                    textElement.style.borderRadius = '10px';
+                    textElement.style.padding = '10px';
+                    document.getElementById('edit-btn').textContent = '✅ Save';
+                } else {
+                    textElement.contentEditable = 'false';
+                    textElement.style.outline = 'none';
+                    textElement.style.padding = '0';
+                    document.getElementById('edit-btn').textContent = '✏️ Edit Text';
+                    this.saveText();
+                }
+                
+                this.playSound('edit');
+            }
+            
+            saveText() {
+                const text = document.getElementById('main-text').textContent;
+                localStorage.setItem('funky-text', text);
+            }
+            
+            updateThemeButton() {
+                const theme = this.themes[this.currentTheme];
+                document.getElementById('theme-btn').textContent = `${theme.emoji} ${theme.name}`;
+            }
+            
+            updateSpeedButton() {
+                const speedLabels = { 0.5: '🐌 Slow', 1: '⚡ Normal', 1.5: '🚀 Fast', 2: '💫 Turbo' };
+                document.getElementById('speed-btn').textContent = speedLabels[this.animationSpeed];
+            }
+            
+            updateSoundButton() {
+                document.getElementById('sound-btn').textContent = this.soundEnabled ? '🔊 Sound' : '🔇 Muted';
+            }
+            
+            playSound(type) {
+                if (!this.soundEnabled) return;
+                
+                // Simple sound synthesis using Web Audio API
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    const frequencies = {
+                        click: 800,
+                        emoji: 600,
+                        theme: 400,
+                        speed: 500,
+                        edit: 700,
+                        sound_on: 900
+                    };
+                    
+                    oscillator.frequency.setValueAtTime(frequencies[type] || 440, audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+            
+            loadPreferences() {
+                const savedTheme = localStorage.getItem('funky-theme');
+                const savedSpeed = localStorage.getItem('funky-speed');
+                const savedSound = localStorage.getItem('funky-sound');
+                const savedText = localStorage.getItem('funky-text');
+                
+                if (savedTheme !== null) {
+                    this.currentTheme = parseInt(savedTheme);
+                    const theme = this.themes[this.currentTheme];
+                    document.body.style.background = theme.gradient;
+                    document.body.style.backgroundSize = '400% 400%';
+                }
+                
+                if (savedSpeed !== null) {
+                    this.animationSpeed = parseFloat(savedSpeed);
+                    this.cycleSpeed();
+                    this.animationSpeed = parseFloat(savedSpeed); // Reset to saved value
+                }
+                
+                if (savedSound !== null) {
+                    this.soundEnabled = savedSound === 'true';
+                }
+                
+                if (savedText) {
+                    document.getElementById('main-text').textContent = savedText;
+                }
+            }
+            
+            savePreferences() {
+                localStorage.setItem('funky-theme', this.currentTheme.toString());
+                localStorage.setItem('funky-speed', this.animationSpeed.toString());
+                localStorage.setItem('funky-sound', this.soundEnabled.toString());
+            }
+            
+            startCursorTrail() {
+                // Cleanup old trails periodically
+                setInterval(() => {
+                    while (this.cursorTrail.length > this.maxTrailLength) {
+                        const oldTrail = this.cursorTrail.shift();
+                        if (oldTrail.parentNode) oldTrail.remove();
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Initialize interactive features when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new FunkyInteractions();
+        });
+        
+        // Progressive enhancement - ensure page works without JavaScript
+        if (!document.querySelector('script')) {
+            console.log('JavaScript not supported - basic page functionality maintained');
+        }
+    </script>
 </body>
 </html>
