@@ -1,0 +1,2 @@
+# This file preserves the logs directory structure
+# Server logs will be created here but excluded from git tracking

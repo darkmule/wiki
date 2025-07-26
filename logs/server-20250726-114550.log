@@ -1,2 +1,0 @@
-127.0.0.1 - - [26/Jul/2025 11:46:21] "GET /hello-world.html HTTP/1.1" 200 -
-127.0.0.1 - - [26/Jul/2025 11:49:56] "GET /hello-world.html HTTP/1.1" 200 -
