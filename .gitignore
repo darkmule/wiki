@@ -1,0 +1,2 @@
+# Exclude server log files
+logs/*.log
